@@ -3,11 +3,13 @@ import axios from "axios";
 import { useAuth } from "../storeing-data/auth"; // Use Auth Context for token
 import styles from "./ToggleStatus.module.css"; // Import CSS for styling
 
-const ToggleStatus = ({ user }) => {
+const ToggleStatus = () => {
   const { authorizationToken } = useAuth(); // Get token from AuthContext
   const [isOnline, setIsOnline] = useState(user.isOnline); // Initialize state with user.isOnline
   const [loading, setLoading] = useState(false); // Track API call status
   const [error, setError] = useState(null); // Track errors
+
+  const { user } = useAuth();
 
   const handleToggle = async () => {
     setLoading(true);
