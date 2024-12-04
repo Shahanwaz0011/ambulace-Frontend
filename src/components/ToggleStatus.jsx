@@ -1,48 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../storeing-data/auth"; // Use Auth Context for token
 import styles from "./ToggleStatus.module.css"; // Import CSS for styling
 
 const ToggleStatus = () => {
-  const { authorizationToken } = useAuth(); // Get token from AuthContext
-  const [isOnline, setIsOnline] = useState(user.isOnline); // Initialize state with user.isOnline
+  const { authorizationToken, user } = useAuth(); // Extract user and token from context
+  const [isOnline, setIsOnline] = useState(user?.isOnline || false); // Initialize based on user's status
   const [loading, setLoading] = useState(false); // Track API call status
-  const [error, setError] = useState(null); // Track errors
+  const [error, setError] = useState(""); // Track errors
 
-  const { user } = useAuth();
-
+  // Function to toggle the driver's online status
   const handleToggle = async () => {
     setLoading(true);
-    setError(null);
+    setError("");
 
     try {
-      // Send the new status to the backend
       const response = await axios.patch(
-        `https://ambulance-backend-912.vercel.app/api/auth/driver/set-status/${user._id}`, // Use user._id
-        { isOnline: !isOnline }, // Toggle the status
+        `https://ambulance-backend-912.vercel.app/api/auth/driver/set-status/${user._id}`,
+        { isOnline: !isOnline },
         {
           headers: {
-            Authorization: authorizationToken, // Authorization header with token
+            Authorization: authorizationToken,
             "Content-Type": "application/json",
           },
         }
       );
 
       if (response.status === 200) {
-        setIsOnline(!isOnline); // Update the state based on the response
+        setIsOnline(!isOnline); // Update the online status
       }
     } catch (err) {
       console.error("Failed to update status:", err);
-      setError("Failed to update status. Please try again.");
+      setError(
+        err.response?.data?.message || "Failed to update status. Please try again."
+      );
     } finally {
-      setLoading(false);
+      setLoading(false); // Ensure loading stops in all cases
     }
   };
 
   return (
     <div className={styles.toggleContainer}>
       <label className={styles.toggleLabel}>
-        <div className={styles.switch}>
+        <div className={`${styles.switch} ${loading ? styles.disabled : ""}`}>
           <input
             type="checkbox"
             checked={isOnline}
@@ -53,7 +53,14 @@ const ToggleStatus = () => {
           <span className={styles.slider}></span>
         </div>
       </label>
+      {/* Show loading state */}
+      {loading && <p className={styles.loadingMessage}>Updating status...</p>}
+      {/* Show error messages if any */}
       {error && <p className={styles.errorMessage}>{error}</p>}
+      {/* Display current status */}
+      <p className={styles.statusMessage}>
+        {isOnline ? "You are Online" : "You are Offline"}
+      </p>
     </div>
   );
 };
