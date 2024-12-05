@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -11,8 +11,9 @@ const MapComponent = () => {
   const [isUserOnline, setIsUserOnline] = useState(false); // State to track user's online status
   const [mapCenter, setMapCenter] = useState([21.2168, 81.4292]); // Default map center
 
+  const mapRef = useRef(null); // Ref to the map container
+
   const [lastLocationUpdate, setLastLocationUpdate] = useState(Date.now()); // Track last location update time
-  const [locationTimeout, setLocationTimeout] = useState(null); // Timeout to check inactivity
 
   // Function to fetch drivers' locations
   const updateDriversLocation = async () => {
@@ -34,9 +35,7 @@ const MapComponent = () => {
   // Fetch drivers on initial load and update every 1 second
   useEffect(() => {
     updateDriversLocation();
-
     const intervalId = setInterval(updateDriversLocation, 300);
-
     return () => {
       clearInterval(intervalId);
     };
@@ -48,19 +47,13 @@ const MapComponent = () => {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          console.log("User location:", latitude, longitude); // Debugging log
 
           setUserLocation([latitude, longitude]);
-          setMapCenter([latitude, longitude]); // Update map center to user's location
+          setMapCenter([latitude, longitude]); // Set initial map center to user's location
           setIsUserOnline(true); // Mark user as online
 
           // Update the last location update time
           setLastLocationUpdate(Date.now());
-
-          // Reset inactivity timer whenever a location is received
-          if (locationTimeout) {
-            clearTimeout(locationTimeout);
-          }
 
           // Send updated location to the backend
           try {
@@ -74,9 +67,7 @@ const MapComponent = () => {
             });
 
             const data = await response.json();
-            if (response.ok) {
-              console.log("Location updated successfully");
-            } else {
+            if (!response.ok) {
               console.error("Failed to update location:", data.error);
             }
           } catch (error) {
@@ -90,29 +81,9 @@ const MapComponent = () => {
     }
   };
 
-  // Handle user inactivity (offline logic)
-  useEffect(() => {
-    // If the last location update was more than 1 minute ago, mark user as offline
-    const checkInactivity = () => {
-      if (Date.now() - lastLocationUpdate > 60000) { // 1 minute
-        setIsUserOnline(false);
-        console.log("User is offline");
-      }
-    };
-
-    const timeoutId = setInterval(checkInactivity, 1000); // Check every second
-
-    // Cleanup the interval when the component unmounts
-    return () => {
-      clearInterval(timeoutId);
-    };
-  }, [lastLocationUpdate]);
-
   // Update user's location every 1 second
   useEffect(() => {
     const locationIntervalId = setInterval(updateUserLocation, 1000);
-
-    // Cleanup the interval when the component unmounts
     return () => {
       clearInterval(locationIntervalId);
     };
@@ -127,11 +98,31 @@ const MapComponent = () => {
     shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
   });
 
+  // Set map center initially based on user location
+  useEffect(() => {
+    if (userLocation && mapRef.current) {
+      const map = mapRef.current;
+      map.setView(userLocation, 13, { animate: true, duration: 1.5 }); // Animate the view to user's location
+    }
+  }, [userLocation]);
+
   return (
     <MapContainer
-      center={mapCenter}
+      ref={mapRef}
+      center={mapCenter} // Use the state mapCenter for initial location
       zoom={13}
       style={{ height: "100vh", width: "100%" }}
+      whenCreated={(map) => {
+        mapRef.current = map;
+
+        // Disable centering on drag or zoom
+        map.on('moveend', () => {
+          // Prevent automatic centering after user drags or zooms the map
+          if (userLocation) {
+            map.setView(userLocation, 13, { animate: false }); // Revert back to user's location on moveend
+          }
+        });
+      }}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -151,23 +142,18 @@ const MapComponent = () => {
       )}
 
       {/* Show drivers' location markers */}
-      {drivers.length === 0 ? (
-        <div>No online drivers found</div>
-      ) : (
-        drivers.map((driver) => {
-          const driverLat = driver.location.coordinates[1];
-          const driverLon = driver.location.coordinates[0];
-
-          return (
-            <Marker key={driver._id} position={[driverLat, driverLon]} icon={commonMarkerIcon}>
-              <Popup>
-                <strong>{driver.name}</strong><br />
-                Phone: {driver.phone}
-              </Popup>
-            </Marker>
-          );
-        })
-      )}
+      {drivers.map((driver) => {
+        const driverLat = driver.location.coordinates[1];
+        const driverLon = driver.location.coordinates[0];
+        return (
+          <Marker key={driver._id} position={[driverLat, driverLon]} icon={commonMarkerIcon}>
+            <Popup>
+              <strong>{driver.name}</strong><br />
+              Phone: {driver.phone}
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 };
