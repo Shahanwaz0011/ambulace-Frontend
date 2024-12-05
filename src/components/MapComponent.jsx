@@ -32,10 +32,10 @@ const MapComponent = () => {
     }
   };
 
-  // Fetch drivers every 0.5 seconds
+  // Fetch drivers on initial load and update every 1 second
   useEffect(() => {
     updateDriversLocation();
-    const intervalId = setInterval(updateDriversLocation, 500); // Fetch data every 0.5 sec
+    const intervalId = setInterval(updateDriversLocation, 300);
     return () => {
       clearInterval(intervalId);
     };
@@ -49,7 +49,9 @@ const MapComponent = () => {
           const { latitude, longitude } = position.coords;
 
           setUserLocation([latitude, longitude]);
-          setMapCenter([latitude, longitude]); // Set initial map center to user's location
+          if (!mapCenter) {
+            setMapCenter([latitude, longitude]); // Set initial map center to user's location only once
+          }
           setIsUserOnline(true); // Mark user as online
 
           // Update the last location update time
@@ -98,30 +100,14 @@ const MapComponent = () => {
     shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
   });
 
-  // Set map center initially based on user location
-  useEffect(() => {
-    if (userLocation && mapRef.current) {
-      const map = mapRef.current;
-      map.setView(userLocation, 13, { animate: true, duration: 1.5 }); // Animate the view to user's location
-    }
-  }, [userLocation]);
-
   return (
     <MapContainer
       ref={mapRef}
       center={mapCenter} // Use the state mapCenter for initial location
-      zoom={13}
+      zoom={5}
       style={{ height: "100vh", width: "100%" }}
       whenCreated={(map) => {
         mapRef.current = map;
-
-        // Disable centering on drag or zoom
-        map.on('moveend', () => {
-          // Prevent automatic centering after user drags or zooms the map
-          if (userLocation) {
-            map.setView(userLocation, 13, { animate: false }); // Revert back to user's location on moveend
-          }
-        });
       }}
     >
       <TileLayer
