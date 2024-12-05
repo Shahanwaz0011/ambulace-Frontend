@@ -32,10 +32,10 @@ const MapComponent = () => {
     }
   };
 
-  // Fetch drivers on initial load and update every 1 second
+  // Fetch drivers every 0.5 seconds
   useEffect(() => {
     updateDriversLocation();
-    const intervalId = setInterval(updateDriversLocation, 300);
+    const intervalId = setInterval(updateDriversLocation, 500); // Fetch data every 0.5 sec
     return () => {
       clearInterval(intervalId);
     };
