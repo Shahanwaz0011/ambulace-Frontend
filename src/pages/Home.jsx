@@ -9,19 +9,19 @@ const Home = () => {
   // Example drivers data
   const drivers = [
     {
-      name: "John Doe",
-      contactNumber: "+1234567890",
-      distance: "5 miles"
+      name: "Ravi",
+      contactNumber: "+9134567890",
+      distance: "5 km"
     },
     {
-      name: "Jane Smith",
-      contactNumber: "+0987654321",
-      distance: "3 miles"
+      name: "Jatin ",
+      contactNumber: "+91987654321",
+      distance: "3 km"
     },
     {
-      name: "Emily Johnson",
-      contactNumber: "+1122334455",
-      distance: "7 miles"
+      name: "Vikas",
+      contactNumber: "+91822334455",
+      distance: "1.5 km"
     }
   ];
 
