@@ -2,43 +2,65 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../storeing-data/auth"; // Assuming you have an auth context or hook
 import styles from "./Nav.module.css"; // Import styling for the Nav
-import ToggleStatus from "./ToggleStatus";
+import ToggleStatus from "./ToggleStatus"; // Assuming this handles driver status toggling
 
 const Navbar = () => {
   const { user } = useAuth(); // Assuming useAuth provides user and login/logout functions
 
   return (
     <nav className={styles.navbar}>
+      {/* Logo Section */}
       <div className={styles.logo}>
         <Link to="/" className={styles.logoText}>
           Ambulance Tracker
         </Link>
       </div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginRight: "1em" }}>
-        <div className={styles.menu}>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/about">About</Link>
-            </li>
-            <li>
-              <Link to="/services">Services</Link>
-            </li>
-          </ul>
-        </div>
-        <div className={styles.btn}>
-          {/* Check if the user type is driver, then show ToggleStatus */}
-          {user && user.type === "driver" && <ToggleStatus user={user} />}
-          
+
+      {/* Navigation Links */}
+      <div className={styles.menu}>
+        <ul className={styles.navList}>
+          <li>
+            <Link to="/" className={styles.navLink}>
+              Home
+            </Link>
+          </li>
+         
+          <li>
+            <Link to="/services" className={styles.navLink}>
+              Services
+            </Link>
+          </li>
+          <li>
+            <Link to="/hospital" className={styles.navLink}>
+              Hospital Availability
+            </Link>
+          </li>
+          <li>
+            <Link to="/about" className={styles.navLink}>
+              About
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      {/* User Controls */}
+      <div className={styles.userControls}>
+        {/* Show ToggleStatus if user is a driver */}
+        {user && user.type === "driver" && (
+          <div className={styles.statusToggle}>
+            <ToggleStatus user={user} />
+          </div>
+        )}
+
+        {/* Authentication Buttons */}
+        <div className={styles.authButtons}>
           {user ? (
             <Link to="/logout" className={styles.navLink}>
-              <button className={styles.loginButton}>Logout</button>
+              <button className={styles.actionButton}>Logout</button>
             </Link>
           ) : (
             <Link to="/login" className={styles.navLink}>
-              <button className={styles.loginButton}>Login</button>
+              <button className={styles.actionButton}>Login</button>
             </Link>
           )}
         </div>
@@ -48,3 +70,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
