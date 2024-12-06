@@ -6,7 +6,6 @@ import { Logout } from "../pages/Logout";
 import About from "../pages/About"; // Import the About page
 import Services from "../pages/Services"; // Import the Services page
 import Hospital from "../pages/Hospital"; // Import the Hospital component (adjust the path if needed)
-
 export const PageRoutes = () => {
   return (
     <>
