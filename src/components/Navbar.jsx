@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../storeing-data/auth"; // Assuming you have an auth context or hook
 import styles from "./Nav.module.css"; // Import styling for the Nav
@@ -14,10 +15,7 @@ const Navbar = () => {
           Ambulance Tracker
         </Link>
       </div>
-<<<<<<< HEAD
 
-=======
->>>>>>> 48d8ade1b6b6eaca32faca0043cb4a435b2967a8
       {/* Navigation Links */}
       <div className={styles.menu}>
         <ul className={styles.navList}>
@@ -44,10 +42,7 @@ const Navbar = () => {
           </li>
         </ul>
       </div>
-<<<<<<< HEAD
 
-=======
->>>>>>> 48d8ade1b6b6eaca32faca0043cb4a435b2967a8
       {/* User Controls */}
       <div className={styles.userControls}>
         {/* Show ToggleStatus if user is a driver */}
@@ -56,10 +51,7 @@ const Navbar = () => {
             <ToggleStatus user={user} />
           </div>
         )}
-<<<<<<< HEAD
 
-=======
->>>>>>> 48d8ade1b6b6eaca32faca0043cb4a435b2967a8
         {/* Authentication Buttons */}
         <div className={styles.authButtons}>
           {user ? (
@@ -72,8 +64,9 @@ const Navbar = () => {
             </Link>
           )}
         </div>
-@@ -48,3 +70,4 @@ const Navbar = () => {
+      </div>
+    </nav>
+  );
 };
 
 export default Navbar;
-
