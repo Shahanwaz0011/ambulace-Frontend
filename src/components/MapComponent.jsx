@@ -75,6 +75,7 @@ const MapComponent = () => {
           } catch (error) {
             console.error("Error sending location to backend:", error);
           }
+          console.log("OK");
         },
         (error) => {
           console.error("Error getting geolocation: ", error);
